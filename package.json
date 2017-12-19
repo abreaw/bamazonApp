@@ -1,0 +1,23 @@
+{
+  "name": "bamazon",
+  "version": "0.0.1",
+  "description": "Simple Command Line Inventory App using MySQL and Node.js",
+  "main": "bamazonCustomer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abreaw/bamazonApp.git"
+  },
+  "author": "Brea Torres",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/abreaw/bamazonApp/issues"
+  },
+  "homepage": "https://github.com/abreaw/bamazonApp#readme",
+  "dependencies": {
+    "inquirer": "^4.0.1",
+    "mysql": "^2.15.0"
+  }
+}
