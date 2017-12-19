@@ -21,3 +21,6 @@ INSERT INTO products (product_name,department_name,price,stock_quantity) VALUES
   ('Spiral Cut Ham','Meat',19.99,25), ('Pecans - Whole','Produce',3.99,20), ('Walnuts - Whole','Produce',3.99,20), ('Gift Cards','Gifts',25.00,200);
   
 SELECT * FROM products;
+
+SELECT * FROM products
+  WHERE item_id = 2;
