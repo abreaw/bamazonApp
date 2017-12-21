@@ -13,6 +13,7 @@ var numProducts;  // number of rows returned from the database
 // var itemSelectedId;  // item ID from the DB query
 var itemSelectedName;  // item Name from the DB query
 var itemSelectedQuantity;  // item quantity from the DB query
+var itemSelectedPrice;  // item price from the DB query
 
 
 // create connection using the bamazon database informaiton so the app can get access to the data
@@ -128,7 +129,7 @@ function formatTableData(id, name, price) {
 // ---------------------------------------------------------------------------------------------------------------
 // Prompt User via command line for the item ID they would like to purchase
 // arguments: none
-// returns: item ID
+// returns: nothing
 // ---------------------------------------------------------------------------------------------------------------
 function promptUserID() {
 
@@ -167,54 +168,42 @@ function promptUserID() {
 
 }
 
-
+// ---------------------------------------------------------------------------------------------------------------
+// Check the ID of the item the user would like to purchase
+// arguments: item id from user
+// returns: 
+// ---------------------------------------------------------------------------------------------------------------
 function checkIdEntered(id) {
 
-
-	// using the numProducts global variable to validate the item id instead of calling another query to be more efficient
-	// if (id > numProducts ) {
-
-	// 	console.log("Item ID " + id + " is not a valid product Id.")
-	// 	promptUserID();
-	// }
-	// else {
-
-	// 	console.log("no problem w/ item ID entered");
-	// 	itemID = id;
-	// 	promptUserQuantity();
-	// }
-
-
-	// decided to go w/ the query statement so app could have access to the information from the db about the item selected
-	// first run checks w/ a query but if the ids are generated automatically we can get the number of records from the 
-	// first query run to display the inventory and use that to validate instead of using another call to the db
+	// query used to validate if the item id input from the user is valid
 	var query = connection.query("SELECT * FROM `products` WHERE item_id = ?", [id], function (err, results, fields) {
 
 		// console.log(query.sql);
-		console.log(results);
+		// console.log(results);
 
 		if (err || results[0] === undefined) {
 
-			console.log("issue w/ query = " + err);
+			// console.log("issue w/ query = " + err);
 			console.log("Item ID " + id + " is not a valid product Id.")
 			promptUserID();
 		}
 		else {
 
-			console.log("no problem w/ query");
+			// console.log("no problem w/ query");
 			itemID = id;
 			itemSelectedName = results[0].product_name;
-			console.log("Thank you.  You have selected '" + itemSelectedName.cyan + "' for your purchase.");
+			itemSelectedPrice = results[0].price;
+			// console.log("Price = " + itemSelectedPrice);
+			console.log("\n\nThank you.  You have selected '" + itemSelectedName.cyan + "' for your purchase.");
 			promptUserQuantity();
 		}
 
 	});
 }
 
+
 // ---------------------------------------------------------------------------------------------------------------
 // Prompt User via command line for the quantity they would like to purchase
-// arguments: 
-// returns: 
 // ---------------------------------------------------------------------------------------------------------------
 function promptUserQuantity() {
 
@@ -246,7 +235,7 @@ function promptUserQuantity() {
 	    }
 	    else {
 
-	      console.log("answer entered = " + answer.amount);
+	      // console.log("answer entered = " + answer.amount);
 	      checkQuantityEntered(parseInt(answer.amount));
 	    }
 	  });
@@ -263,32 +252,36 @@ function promptUserQuantity() {
 function checkQuantityEntered(amt) {
 
 
+	// query the DB to validate if the quantity entered by the user is available
 	var query = connection.query("SELECT stock_quantity FROM `products` WHERE item_id = ?", [itemID], function (err, results, fields) {
 
-		console.log(query.sql);
+		// console.log(query.sql);
 
 		if (err) {
 
-			console.log("issue w/ query = " + err);
-			console.log("Quantity " + amt + " is not a valid amount.")
+			// console.log("issue w/ query = " + err);
+			console.log("\nQuantity " + amt + " is not a valid amount.");
 			promptUserQuantity();
 		}
 		else {
 
-			console.log("no problem w/ query");
+			// console.log("no problem w/ query");
 			// console.log(results);
 
+			// set global variable quantity to amount in stock from DB query
 			itemQuantity = results[0].stock_quantity;
 			// console.log(itemQuantity);
 
 			// check to see if quantity entered by user is larger than the quantity in inventory
 			if (amt > itemQuantity) {
 
-				console.log("Only " + itemQuantity + " are in stock.  Please enter a valid quantity.");
+				console.log("\nOnly " + itemQuantity + " are in stock.  Please enter a valid quantity.");
 				promptUserQuantity();
 			}
 			else {
 
+				// set global variable to item quantity requested by user
+				itemSelectedQuantity = amt;
 				updateInventoryAmt();
 			}
 		}
@@ -300,13 +293,97 @@ function checkQuantityEntered(amt) {
 
 // ---------------------------------------------------------------------------------------------------------------
 // Update the db for the inventory quantity for the item the user is purchasing
-// arguments: quantity from user
-// returns: 
 // ---------------------------------------------------------------------------------------------------------------
 function updateInventoryAmt() {
 
-	console.log("updating inventory now ... ");
+	// console.log("updating inventory now ... ");
 
+	var newQuantity = itemQuantity - itemSelectedQuantity;
+
+	var query = connection.query("UPDATE products SET stock_quantity = ? WHERE item_id = ?", [newQuantity, itemID], function (err, results, fields) {
+
+		// console.log(query.sql);
+		// console.log(results);
+		// console.log("err = " + err);
+		// console.log("fields = " + fields);
+
+		if (err != null || results.affectedRows === 0) {
+
+			// console.log("issue w/ query = " + err);
+			// console.log("affectedRows = " + results.affectedRows);
+			console.log("\n\nPurchase not completed.  Please try again.");
+			// clearPrevItemData();
+			getInventory();
+		}
+		else {
+
+			// console.log("no problem w/ query");
+			// console.log("price = " + itemSelectedPrice);
+			// console.log("quantity = " + itemSelectedQuantity);
+			var totalPrice = itemSelectedPrice * itemSelectedQuantity;
+			// console.log("total amt of purchase = " + totalPrice);
+			console.log("\n\nThank you.  Your total purchase is '" + "$".cyan + totalPrice.toString().cyan + "' you will be billed when your order is shipped. \n\nYour '" + itemSelectedName.cyan + "' will arrive within 7-10 business days.");
+			promptUserContinueShopping();
+		}
+
+	});
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Ask User if they would like to continue shopping at Bamazon
+// If they do restart app
+// If they do not then end the DB connection and close down the app 
+// ---------------------------------------------------------------------------------------------------------------
+function promptUserContinueShopping() {
+
+	// console.log("continue shopping module loaded ... ");
+	
+	// Create a "Prompt" to see if user wants to continue shopping 
+	inquirer
+	  .prompt([
+	    // Here we create a basic text prompt.
+	    {
+	      type: "confirm",
+	      message: "Would you like to continue shopping?",
+	      name: "continue"
+	    }
+	  ])
+	  .then(function(inquirerResponse) {
+	    
+	  	if (inquirerResponse.continue) {
+	      console.log("\nGreat!\n".yellow);
+	      clearPrevItemData();
+	    }
+	    else {
+	      
+	      console.log("\n\nThanks for shopping with Bamazon!  Please come again!\n\n".rainbow);
+	      // end the shopping app now
+	      connection.end();
+	      return;
+	    }
+	});
+
+}
+
+
+// ---------------------------------------------------------------------------------------------------------------
+// Reset all the global variables being used and display the Inventory to the user again to restart the app 
+// ---------------------------------------------------------------------------------------------------------------
+function clearPrevItemData() {
+
+	// clear out all the global variable and restart the module
+	console.log("restarting app ... calling the getInventory function to move through the process again");
+
+	// reset global variables 
+	itemID = 0;  // itemID entered by user
+	itemQuantity = 0;  // item Quantity to purchase entered by user
+	numProducts = 0;  // number of rows returned from the database
+
+	itemSelectedName = "";  // item Name from the DB query
+	itemSelectedQuantity = 0;  // item quantity from the DB query
+	itemSelectedPrice = 0;  // item price from the DB query
+
+	getInventory();
 
 }
 
