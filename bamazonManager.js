@@ -19,6 +19,16 @@ var colors = require("colors");
 // global variable needed
 var lowInventoryNum = 5;  // set the amt of what low inventory is considered in this app
 
+var itemID;  // itemID entered by user
+var itemQuantity;  // existing quantity of Item selected to update
+var itemName;  // item name entered by user
+var itemDept;  // item department entered by user
+var itemPrice; // item price entered by user
+
+var itemSelectedName;  // item Name from the DB query
+var itemUpdateQuantity;  // item quantity from the DB query
+// var itemSelectedPrice;  // item price from the DB query
+
 // create connection using the bamazon database informaiton so the app can get access to the data
 var connection = mysql.createConnection({
 
@@ -61,18 +71,20 @@ function mainMenuPrompt(){
 
 		switch(answer.processSelected) {
 		    case "View Products for Sale":
-		        console.log("view products for sale - selected");
+		        // console.log("view products for sale - selected");
 		        viewProducts();
 		        break;
 		    case "View Low Inventory":
-		        console.log("View Low Inventory - selected");
+		        // console.log("View Low Inventory - selected");
 		        viewLowInventory();
 		        break;
 		    case "Add to Inventory":
-		    	console.log("Add to Inventory - selected");
+		    	// console.log("Add to Inventory - selected");
+		    	addInventoryAmt();
 		        break;
 		    case "Add New Product":
-		    	console.log("Add New Product - selected");
+		    	// console.log("Add New Product - selected");
+		    	addInventoryItem();
 		        break;
 		    default:
 		        console.log("Selection Invalid. Try again.");
@@ -92,7 +104,7 @@ function mainMenuPrompt(){
 // ---------------------------------------------------------------------------------------------------------------
  function viewProducts() {
 
- 	console.log("view products for sale function started");
+ 	// console.log("view products for sale function started");
 
  	connection.query("SELECT * FROM `products`", function (err, results, fields) {
 
@@ -112,7 +124,8 @@ function mainMenuPrompt(){
 		}
 
 		console.log("----------------------------------------------------------");
-		connection.end();  // might need to put this elsewhere to get the connection to run properly
+		mainMenuPrompt();
+		// connection.end();  // might need to put this elsewhere to get the connection to run properly
 
 	});
 
@@ -127,7 +140,7 @@ function mainMenuPrompt(){
 // ---------------------------------------------------------------------------------------------------------------
  function viewLowInventory() {
 
- 	console.log("view items that have low inventory function started");
+ 	// console.log("view items that have low inventory function started");
 
  	// lowInventoryNum = 50;  // test to check query for normal quantity amt
 
@@ -162,11 +175,508 @@ function mainMenuPrompt(){
 
 			console.log("----------------------------------------------------------");
 			console.log("");
-			connection.end();  // might need to put this elsewhere to get the connection to run properly
+			mainMenuPrompt();
+			// connection.end();  // might need to put this elsewhere to get the connection to run properly
 		}
 	});
 
  }
+
+
+// ---------------------------------------------------------------------------------------------------------------
+// add quantity to inventory items using a prompt to determine which and how much should be added
+// arguments: 
+// returns: 
+// ---------------------------------------------------------------------------------------------------------------
+function addInventoryAmt() {
+
+ 	// console.log("increase inventory function started");
+
+ 	promptUserInventoryItem();
+
+ }
+
+
+// ---------------------------------------------------------------------------------------------------------------
+// add new item to inventory item information for the add
+// arguments: 
+// returns: 
+// ---------------------------------------------------------------------------------------------------------------
+function addInventoryItem() {
+
+	// console.log("add item to inventory function started");
+
+ 	promptUserNewItem();
+
+ }
+
+
+// ---------------------------------------------------------------------------------------------------------------
+// ask user for inventory item id and how much should be added to existing inventory
+// arguments: 
+// returns: 
+// ---------------------------------------------------------------------------------------------------------------
+function promptUserInventoryItem() {
+
+	// Create a "Prompt" to get the item ID from the user 
+	inquirer
+	  .prompt([
+	    // Here we create a basic text prompt.
+	    {
+	      type: "input",
+	      message: "\nEnter the Item ID of the product for which you would like to increase stock.",
+	      name: "id",
+	      validate: function(value) 
+	      	  {
+	            // regular expression (regexp) used to make sure all the characters entered by the user are numbers
+	            var pass = value.match(/^\d+$/);  // ^ means beginning - \d means digits - + means must contain at least one digit - $ means to the end
+	            if (pass) {
+	              return true;
+	            } else {
+		          console.log('  -- Please enter a valid number.');
+		        }
+	          }
+	    }
+	  ])
+	  .then(function(answer) {
+	    // Check to see if the user enters their a valid Item id
+	    if (answer.id === "" || answer.id === "0") {
+	      console.log("\nPlease enter a valid Item ID.");
+	      promptUserInventoryItem();
+	    }
+	    else {
+
+	      // console.log("answer entered = " + answer.id);
+	      checkIdEntered(parseInt(answer.id));
+	    }
+	  });
+
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// ask user for inventory item information to add new product to inventory
+// arguments: 
+// returns: 
+// ---------------------------------------------------------------------------------------------------------------
+function promptUserNewItem() {
+
+	// console.log("starting new item add process ... ");
+
+	enterItemName();
+
+}
+
+
+
+// ---------------------------------------------------------------------------------------------------------------
+// ask user for inventory item name to add new product to inventory
+// arguments: 
+// returns: 
+// ---------------------------------------------------------------------------------------------------------------
+function enterItemName() {
+
+	// Create a "Prompt" to get the item ID from the user 
+	inquirer
+	  .prompt([
+	    // Here we create a basic text prompt.
+	    {
+	      type: "input",
+	      message: "\nEnter the Item Name to be added.",
+	      name: "name"
+	    }
+	  ])
+	  .then(function(answer) {
+	    // Check to see if the user enters their a valid Item id
+	    if (answer.name === "") {
+	      console.log("\nPlease enter an Item Name.");
+	      enterItemName();
+	    }
+	    else {
+
+	      // console.log("answer entered = " + answer.name);
+	      itemName = answer.name;
+	      enterItemDept();
+	    }
+	  });
+}
+
+
+
+// ---------------------------------------------------------------------------------------------------------------
+// ask user for inventory item deptartment to add new product to inventory
+// arguments: 
+// returns: 
+// ---------------------------------------------------------------------------------------------------------------
+function enterItemDept() {
+
+	// Create a "Prompt" to get the item ID from the user 
+	inquirer
+	  .prompt([
+	    // Here we create a basic text prompt.
+	    {
+	      type: "input",
+	      message: "\nEnter the Item Department for the new product.",
+	      name: "dept"
+	    }
+	  ])
+	  .then(function(answer) {
+	    // Check to see if the user enters their a valid Item id
+	    if (answer.dept === "") {
+	      console.log("\nPlease enter an Item dept.");
+	      enterItemDept();
+	    }
+	    else {
+
+	      // console.log("answer entered = " + answer.dept);
+	      itemDept = answer.dept;
+	      enterItemPrice();
+	    }
+	  });
+
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Prompt User via command line for the price of the item they would like to add to existing inventory
+// ---------------------------------------------------------------------------------------------------------------
+function enterItemPrice() {
+
+	// Create a "Prompt" to get the quantity from the user 
+	inquirer
+	  .prompt([
+	    // Here we create a basic text prompt.
+	    {
+	      type: "input",
+	      message: "\nEnter the price of the new product you would like to add to inventory.",
+	      name: "price",
+	      validate: function(value) 
+	      	  {
+	            // regular expression (regexp) used to make sure all the characters entered by the user are numbers
+	            var pass = value.match(/^\d+.\d+$/);  // ^ means beginning - \d means digits - + means must contain at least one digit - $ means to the end
+	            console.log("pass match = ", pass);
+	            if (pass) {
+	              return true;
+	            } else {
+		          console.log('  -- Please enter a valid price (ex. 3.99)');
+		        }
+	          }
+	    }
+	  ])
+	  .then(function(answer) {
+	    // Check to see if the user a quantity
+	    if (answer.price === "") {
+	      console.log("\nPlease enter a valid price.");
+	      enterItemPrice();
+	    }
+	    else {
+
+	      // console.log("answer entered = " + answer.price);
+	      itemPrice = parseFloat(answer.price);
+	      promptUserQuantity(false);
+	    }
+	  });
+
+}
+
+
+// ---------------------------------------------------------------------------------------------------------------
+// Check the ID of the item the user would like to increase inventory quantity
+// arguments: item id from user
+// returns: 
+// ---------------------------------------------------------------------------------------------------------------
+function checkIdEntered(id) {
+
+	// query used to validate if the item id input from the user is valid
+	var query = connection.query("SELECT * FROM `products` WHERE item_id = ?", [id], function (err, results, fields) {
+
+		// console.log(query.sql);
+		// console.log(results);
+
+		if (err || results[0] === undefined) {
+
+			// console.log("issue w/ query = " + err);
+			console.log("Item ID " + id + " is not a valid product Id.")
+			promptUserInventoryItem();
+		}
+		else {
+
+			// console.log("no problem w/ query");
+			itemID = id;
+			itemSelectedName = results[0].product_name;
+			itemSelectedPrice = results[0].price;
+			// console.log("Price = " + itemSelectedPrice);
+			console.log("\n\nYou have selected '" + itemSelectedName.cyan + "' for quantity increase.");
+			promptUserQuantity(true); // do not check existing quantity in db sinc this is a new item
+		}
+
+	});
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Prompt User via command line for the quantity they would like to add to existing inventory amount
+// arguments: true or false (true to check existing quantity or false to not check since it is a new item being added)
+// ---------------------------------------------------------------------------------------------------------------
+function promptUserQuantity(checkQuantity) {
+
+	// Create a "Prompt" to get the quantity from the user 
+	inquirer
+	  .prompt([
+	    // Here we create a basic text prompt.
+	    {
+	      type: "input",
+	      message: "\nEnter the quantity of the item.",
+	      name: "amount",
+	      validate: function(value) 
+	      	  {
+	            // regular expression (regexp) used to make sure all the characters entered by the user are numbers
+	            var pass = value.match(/^\d+$/);  // ^ means beginning - \d means digits - + means must contain at least one digit - $ means to the end
+	            if (pass) {
+	              return true;
+	            } else {
+		          console.log('  -- Please enter a valid quantity');
+		        }
+	          }
+	    }
+	  ])
+	  .then(function(answer) {
+	    // Check to see if the user a quantity
+	    if (answer.amount === "") {
+	      console.log("\nPlease enter a valid quantity.");
+	      promptUserQuantity(checkQuantity);
+	    }
+	    else {
+
+	      // console.log("answer entered = " + answer.amount);
+	      if (checkQuantity) {
+		 
+		 		// console.log("checking existing quantity called now ... ");
+		       checkExistingQuantity(parseInt(answer.amount), checkQuantity);
+		  }
+		  else {
+
+		  		// console.log("itemQuantity of new product set to " + answer.amount);
+		  		// set global variable quantity to amount from user
+		  		itemQuantity = parseInt(answer.amount);
+		  		// console.log(itemQuantity);
+		  		addNewProduct();
+		  }
+	    }
+	  });
+
+}
+
+
+
+// ---------------------------------------------------------------------------------------------------------------
+// Check the quantity in inventory of the item the user would like to update
+// arguments: quantity from user
+// returns: 
+// ---------------------------------------------------------------------------------------------------------------
+function checkExistingQuantity(amt, checkQuantity) {
+
+
+	// query the DB to validate if the quantity entered by the user is available
+	var query = connection.query("SELECT stock_quantity FROM `products` WHERE item_id = ?", [itemID], function (err, results, fields) {
+
+		// console.log(query.sql);
+
+		if (err) {
+
+			// console.log("issue w/ query = " + err);
+			console.log("\nQuantity " + amt + " is not a valid amount.");
+			promptUserQuantity(checkQuantity);
+		}
+		else {
+
+			// console.log("no problem w/ query");
+			// console.log(results);
+
+			// set global variable quantity to amount in stock from DB query
+			itemQuantity = results[0].stock_quantity;
+			// console.log(itemQuantity);
+
+			// set global variable to item quantity requested by user
+			itemUpdateQuantity = amt;
+			updateInventoryAmt();
+		}
+
+	});
+
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Update the db for the inventory quantity for the item the user is adding inventory for
+// ---------------------------------------------------------------------------------------------------------------
+function updateInventoryAmt() {
+
+	// console.log("updating inventory now ... ");
+
+	var newQuantity = itemQuantity + itemUpdateQuantity;
+
+	var query = connection.query("UPDATE products SET stock_quantity = ? WHERE item_id = ?", [newQuantity, itemID], function (err, results, fields) {
+
+		// console.log(query.sql);
+		// console.log(results);
+		// console.log("err = " + err);
+		// console.log("fields = " + fields);
+
+		if (err != null || results.affectedRows === 0) {
+
+			// console.log("issue w/ query = " + err);
+			// console.log("affectedRows = " + results.affectedRows);
+			console.log("\n\nInventory increase not completed.  Please try again.");
+			// clearPrevItemData();
+			addInventoryAmt();
+		}
+		else {
+
+			// console.log("no problem w/ query");
+			// console.log("price = " + itemSelectedPrice);
+			// console.log("quantity = " + itemSelectedQuantity);
+			// console.log("total amt of purchase = " + totalPrice);
+			console.log("\n\nThe quantity of '" + itemSelectedName.cyan + "' has been increased to '" + newQuantity.toString().yellow + "'.");
+			promptUserContinue("Update Inventory");
+			return;
+		}
+
+	});
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// use query to insert a new product / row into the existing products database
+// arguments: 
+// ---------------------------------------------------------------------------------------------------------------
+function addNewProduct() {
+
+	// console.log("adding new product to inventory now ... ");
+
+	var query = connection.query(
+		"INSERT INTO products SET ?",
+		{
+		  product_name: itemName,
+		  department_name: itemDept,
+		  price: itemPrice,
+		  stock_quantity: itemQuantity
+		}, function (err, results, fields) {
+
+		// console.log(query.sql);
+		// console.log(results);
+		// console.log("err = " + err);
+		// console.log("fields = " + fields);
+
+		if (err != null || results.affectedRows === 0) {
+
+			// console.log("issue w/ query = " + err);
+			// console.log("affectedRows = " + results.affectedRows);
+			console.log("\n\nProduct add was not completed.  Please try again.");
+			// clearPrevItemData();
+			addInventoryItem();
+		}
+		else {
+
+			// console.log("no problem w/ query");
+			// console.log("price = " + itemSelectedPrice);
+			// console.log("quantity = " + itemSelectedQuantity);
+			// console.log("total amt of purchase = " + totalPrice);
+			console.log("\n\nNew Product '" + itemName.cyan + "' has been added with '" + itemQuantity.toString().yellow + "' in stock.");
+			promptUserContinue("Add Inventory");
+			return;
+		}
+
+	});
+
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Ask User if they would like to continue with a new option
+// If they do restart app
+// If they do not then end the DB connection and close down the app 
+// arguments: existing process notation
+// ---------------------------------------------------------------------------------------------------------------
+function promptUserContinue(process) {
+
+	// console.log("continue process module loaded ... ");
+	
+	// Create a "Prompt" with a series of questions.
+	inquirer
+	  .prompt([
+	    // Here we give the user a list to choose from.
+	    {
+	      type: "list",
+	      message: "What would you like to do next?",
+	      choices: ["Continue Existing Process", "Return to Main Option Menu", "Quit"],
+	      name: "processSelected"
+	    }
+	  ])
+	  .then(function(answer) {
+	    
+		// Process the user selection and run that process
+		// console.log("answer received = " + answer.processSelected);
+
+		switch(answer.processSelected) {
+		    case "Continue Existing Process":
+		        
+		        // console.log("Continue existing process - selected");
+		        clearPrevItemData();
+		        
+		        switch(process) {
+		        	case "Update Inventory":
+		        		// console.log("returing to update inventory process");
+		        		addInventoryAmt();
+		        		break;
+
+		        	case "Add Inventory":
+		        		// console.log("returning to add product process");
+		        		addInventoryItem();
+		        		break;
+
+		        	default:
+		        		mainMenuPrompt();
+		        }
+		        break;
+
+		    case "Return to Main Option Menu":
+		        // console.log("Main menu option - selected");
+		        mainMenuPrompt();
+		        break;
+
+		    case "Quit":
+		    	// console.log("Quit option - selected");
+		    	console.log("\n\nThanks for helping make Bamazon Great!\n\n".rainbow);
+				// end the shopping app now
+				connection.end();
+				return;
+		        break;
+
+		    default:
+		        console.log("Selection Invalid. Try again.");
+		        promptUserContinue(process);
+		}
+
+	  });
+
+}
+
+
+// ---------------------------------------------------------------------------------------------------------------
+// Reset all the global variables being used  
+// ---------------------------------------------------------------------------------------------------------------
+function clearPrevItemData() {
+
+	// clear out all the global variable and restart the module
+	// console.log("clearing all the global variable data for restart");
+
+	// reset global variables 
+	itemID = 0;  // itemID entered by user
+	itemQuantity = 0;  // item Quantity to purchase entered by user
+	itemName = "";  // item name entered by user
+	itemDept = "";  // item department entered by user
+	itemPrice = 0; // item price entered by user
+	
+	itemSelectedName = "";  // item Name from the DB query
+	itemSelectedQuantity = 0;  // item quantity from the DB query
+
+}
+
 
 
 // ---------------------------------------------------------------------------------------------------------------

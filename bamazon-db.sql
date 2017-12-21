@@ -20,7 +20,21 @@ INSERT INTO products (product_name,department_name,price,stock_quantity) VALUES
   ('Caramel Pieces - 10 pack','Candy',4.89,25), ('Holiday Santa Gift Bag','Seasonal',1.99,35), ('Merlot','Alcohol',12.99,400), ('Shiraz','Alcohol',9.99,250), ('Pinot Noir','Alcohol',10.99,250),
   ('Spiral Cut Ham','Meat',19.99,25), ('Pecans - Whole','Produce',3.99,20), ('Walnuts - Whole','Produce',3.99,20), ('Gift Cards','Gifts',25.00,200);
   
+  
+USE bamazon;
+
 SELECT * FROM products;
 
 SELECT * FROM products
   WHERE item_id = 2;
+  
+USE bamazon;
+  
+UPDATE products
+  SET stock_quantity = ?
+  WHERE item_id = ?;
+
+USE bamazon;
+
+DELETE FROM products
+	WHERE item_id = 18;
