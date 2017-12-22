@@ -47,7 +47,7 @@ _**Add to Inventory**_ allows the user to add a new product to the _**products**
 
 
 
-######To start the app please use the following instructions:
+#####To start the app please use the following instructions:
 
 		1. Make sure you have Node.js installed on your machine
 		1. Run _bamazon-db.sql_ in MySQL Workbench _(to create a mock db for the app with tables populated)_
