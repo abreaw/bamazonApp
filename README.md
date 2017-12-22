@@ -47,11 +47,11 @@ _**Add to Inventory**_ allows the user to add a new product to the _**products**
 
 
 
-#####To start the app please use the following instructions:
+_To start the app please use the following instructions:_
 
 		1. Make sure you have Node.js installed on your machine
-		1. Run _bamazon-db.sql_ in MySQL Workbench _(to create a mock db for the app with tables populated)_
-		1. In your terminal or GitBash session:
-				1. Run `npm install`  *(to install all the npm dependencies needed for the app)*
-				1. Run `node bamazonCustomer.js` *(for the customer app version)*
-				1. Run `node bamazonManager.js` *(for the manager app version)*
+		2. Run _bamazon-db.sql_ in MySQL Workbench _(to create a mock db for the app with tables populated)_
+		3. In your terminal or GitBash session:
+			- Run `npm install`  *(to install all the npm dependencies needed for the app)*
+			- Run `node bamazonCustomer.js` *(for the customer app version)*
+			- Run `node bamazonManager.js` *(for the manager app version)*
