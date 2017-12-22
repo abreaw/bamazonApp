@@ -33,12 +33,10 @@ var connection = mysql.createConnection({
 connection.connect( function(error) {
 
 	if (error) throw error;
-	// console.log("connection as ID = " + connection.threadId);
-	// console.log(connection);
-
+	
 	// function called when connection to the database made
 	getInventory();
-	// connection.end();  // might need to put this elsewhere to get the connection to run properly
+
 });
 
 
@@ -56,16 +54,14 @@ function getInventory() {
 		console.log("");
 		console.log("  ID    Product Name                 Price   ".yellow);
 		console.log("----------------------------------------------");
-		// console.log(results);
-
+		
 		// loop through the results from the select query on the products table
 		for (var i = 0; i < results.length; i++) {
 			console.log(formatTableData(results[i].item_id, results[i].product_name, results[i].price));
 		}
 
 		console.log("----------------------------------------------");
-		// connection.end();  // might need to put this elsewhere to get the connection to run properly
-
+		
 		promptUserID();
 
 	});
@@ -86,15 +82,11 @@ function formatTableData(id, name, price) {
 	// change id to a string for length property to work
 	var idString = id.toString();  
 
-	// console.log("length for id " + idString + " = " + idString.length);
-
 	// check to see if the entry is smaller than the max length
 	if (idString.length < maxIdLength) {
 
 		// calculate the right spacing for the column display
 		var spaceIdLength = maxIdLength - idString.length;
-
-		// console.log("spaceIdLength for " + idString + " = " + spaceIdLength);
 
 		// loop through to add the right amount of space to line up the column information
 		for (var i = 0; i < spaceIdLength; i++) {
@@ -111,8 +103,6 @@ function formatTableData(id, name, price) {
 
 		// calculate the right spacing for the column display
 		var spaceLength = maxNameLength - name.length;
-
-		// console.log("spaceLength for " + name + " = " + spaceLength);
 
 		// loop through to add the right amount of space to line up the column information
 		for (var i = 0; i < spaceLength; i++) {
@@ -161,7 +151,6 @@ function promptUserID() {
 	    }
 	    else {
 
-	      // console.log("answer entered = " + answer.id);
 	      checkIdEntered(parseInt(answer.id));
 	    }
 	  });
@@ -178,22 +167,16 @@ function checkIdEntered(id) {
 	// query used to validate if the item id input from the user is valid
 	var query = connection.query("SELECT * FROM `products` WHERE item_id = ?", [id], function (err, results, fields) {
 
-		// console.log(query.sql);
-		// console.log(results);
-
 		if (err || results[0] === undefined) {
 
-			// console.log("issue w/ query = " + err);
 			console.log("Item ID " + id + " is not a valid product Id.")
 			promptUserID();
 		}
 		else {
 
-			// console.log("no problem w/ query");
 			itemID = id;
 			itemSelectedName = results[0].product_name;
 			itemSelectedPrice = results[0].price;
-			// console.log("Price = " + itemSelectedPrice);
 			console.log("\n\nThank you.  You have selected '" + itemSelectedName.cyan + "' for your purchase.\n");
 			promptUserQuantity();
 		}
@@ -235,7 +218,6 @@ function promptUserQuantity() {
 	    }
 	    else {
 
-	      // console.log("answer entered = " + answer.amount);
 	      checkQuantityEntered(parseInt(answer.amount));
 	    }
 	  });
@@ -255,23 +237,16 @@ function checkQuantityEntered(amt) {
 	// query the DB to validate if the quantity entered by the user is available
 	var query = connection.query("SELECT stock_quantity FROM `products` WHERE item_id = ?", [itemID], function (err, results, fields) {
 
-		// console.log(query.sql);
-
 		if (err) {
 
-			// console.log("issue w/ query = " + err);
 			console.log("\nQuantity " + amt + " is not a valid amount.");
 			promptUserQuantity();
 		}
 		else {
 
-			// console.log("no problem w/ query");
-			// console.log(results);
-
 			// set global variable quantity to amount in stock from DB query
 			itemQuantity = results[0].stock_quantity;
-			// console.log(itemQuantity);
-
+			
 			// check to see if quantity entered by user is larger than the quantity in inventory
 			if (amt > itemQuantity) {
 
@@ -296,36 +271,23 @@ function checkQuantityEntered(amt) {
 // ---------------------------------------------------------------------------------------------------------------
 function updateInventoryAmt() {
 
-	// console.log("updating inventory now ... ");
-
 	var newQuantity = itemQuantity - itemSelectedQuantity;
 
 	var query = connection.query("UPDATE products SET stock_quantity = ? WHERE item_id = ?", [newQuantity, itemID], function (err, results, fields) {
 
-		// console.log(query.sql);
-		// console.log(results);
-		// console.log("err = " + err);
-		// console.log("fields = " + fields);
-
 		if (err != null || results.affectedRows === 0) {
 
-			// console.log("issue w/ query = " + err);
-			// console.log("affectedRows = " + results.affectedRows);
 			console.log("\n\nPurchase not completed.  Please try again.");
-			// clearPrevItemData();
 			getInventory();
 		}
 		else {
 
-			// console.log("no problem w/ query");
-			// console.log("price = " + itemSelectedPrice);
-			// console.log("quantity = " + itemSelectedQuantity);
+			// calculate total for user view
 			var totalPrice = itemSelectedPrice * itemSelectedQuantity;
 
 			// round totalPrice to the nearest hundreths decimal place
 			totalPrice = Math.round(100*totalPrice)/100;
 
-			// console.log("total amt of purchase = " + totalPrice);
 			console.log("\n\nThank you.  Your total purchase is '" + "$".cyan + totalPrice.toFixed(2).cyan + "' you will be billed when your order is shipped. \n\nYour '" + itemSelectedName.cyan + "' will arrive within 7-10 business days.\n");
 			promptUserContinueShopping();
 		}
@@ -340,8 +302,6 @@ function updateInventoryAmt() {
 // ---------------------------------------------------------------------------------------------------------------
 function promptUserContinueShopping() {
 
-	// console.log("continue shopping module loaded ... ");
-	
 	// Create a "Prompt" to see if user wants to continue shopping 
 	inquirer
 	  .prompt([
@@ -374,9 +334,6 @@ function promptUserContinueShopping() {
 // Reset all the global variables being used and display the Inventory to the user again to restart the app 
 // ---------------------------------------------------------------------------------------------------------------
 function clearPrevItemData() {
-
-	// clear out all the global variable and restart the module
-	// console.log("restarting app ... calling the getInventory function to move through the process again");
 
 	// reset global variables 
 	itemID = 0;  // itemID entered by user

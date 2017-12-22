@@ -27,7 +27,6 @@ var itemPrice; // item price entered by user
 
 var itemSelectedName;  // item Name from the DB query
 var itemUpdateQuantity;  // item quantity from the DB query
-// var itemSelectedPrice;  // item price from the DB query
 
 // create connection using the bamazon database informaiton so the app can get access to the data
 var connection = mysql.createConnection({
@@ -70,32 +69,21 @@ function mainMenuPrompt(){
 	  .then(function(answer) {
 	    
 		// Process the user selection and run that process
-		// console.log("answer received = " + answer.processSelected);
-
 		switch(answer.processSelected) {
 		    case "View Products for Sale":
-		        // console.log("view products for sale - selected");
 		        viewProducts();
 		        break;
 		    case "View Low Inventory":
-		        // console.log("View Low Inventory - selected");
 		        viewLowInventory();
 		        break;
 		    case "Add to Inventory":
-		    	// console.log("Add to Inventory - selected");
 		    	addInventoryAmt();
 		        break;
 		    case "Add New Product":
-		    	// console.log("Add New Product - selected");
 		    	addInventoryItem();
 		        break;
 	        case "Quit":
-	      //   	// console.log("Quit option - selected");
-	      //   	console.log("\n\nThanks for helping make Bamazon Great!\n\n".rainbow);
-	    		// // end the shopping app now
-	    		// connection.end();
-	    		// return;
-	    		endApp();
+	        	endApp();
 	            break;
 		    default:
 		        console.log("Selection Invalid. Try again.");
@@ -115,15 +103,9 @@ function mainMenuPrompt(){
 // ---------------------------------------------------------------------------------------------------------------
  function viewProducts() {
 
- 	// console.log("view products for sale function started");
-
  	connection.query("SELECT * FROM `products`", function (err, results, fields) {
 
- 		// console.log("err = " + err);
- 		// console.log("results = ", results);
- 		// console.log("fields = ", fields);
-
-		if (err) throw err;
+ 		if (err) throw err;
 		
 		console.log("");
 		console.log("  ID    Product Name                  Quantity    Price   ".yellow);
@@ -137,7 +119,6 @@ function mainMenuPrompt(){
 		console.log("----------------------------------------------------------");
 		console.log("");
 		mainMenuPrompt();
-		// connection.end();  // might need to put this elsewhere to get the connection to run properly
 
 	});
 
@@ -152,18 +133,11 @@ function mainMenuPrompt(){
 // ---------------------------------------------------------------------------------------------------------------
  function viewLowInventory() {
 
- 	// console.log("view items that have low inventory function started");
-
  	// lowInventoryNum = 50;  // test to check query for normal quantity amt
 
  	var query = connection.query("SELECT * FROM `products` WHERE stock_quantity <= ?",[ lowInventoryNum ], function (err, results, fields) {
 
- 		// console.log(query.sql);
- 		// console.log("err = " + err);
- 		// console.log("results = ", results[0]);
- 		// console.log("fields = ", fields);
-
-		if (err != null) {
+ 		if (err != null) {
 
 			console.log("\n Error getting data requested.  Please try again.\n\n");
 			mainMenuPrompt();
@@ -188,7 +162,6 @@ function mainMenuPrompt(){
 			console.log("----------------------------------------------------------");
 			console.log("");
 			mainMenuPrompt();
-			// connection.end();  // might need to put this elsewhere to get the connection to run properly
 		}
 	});
 
@@ -202,8 +175,6 @@ function mainMenuPrompt(){
 // ---------------------------------------------------------------------------------------------------------------
 function addInventoryAmt() {
 
- 	// console.log("increase inventory function started");
-
  	promptUserInventoryItem();
 
  }
@@ -216,9 +187,7 @@ function addInventoryAmt() {
 // ---------------------------------------------------------------------------------------------------------------
 function addInventoryItem() {
 
-	// console.log("add item to inventory function started");
-
- 	promptUserNewItem();
+	promptUserNewItem();
 
  }
 
@@ -258,7 +227,6 @@ function promptUserInventoryItem() {
 	    }
 	    else {
 
-	      // console.log("answer entered = " + answer.id);
 	      checkIdEntered(parseInt(answer.id));
 	    }
 	  });
@@ -271,8 +239,6 @@ function promptUserInventoryItem() {
 // returns: 
 // ---------------------------------------------------------------------------------------------------------------
 function promptUserNewItem() {
-
-	// console.log("starting new item add process ... ");
 
 	enterItemName();
 
@@ -305,7 +271,6 @@ function enterItemName() {
 	    }
 	    else {
 
-	      // console.log("answer entered = " + answer.name);
 	      itemName = answer.name;
 	      enterItemDept();
 	    }
@@ -339,7 +304,6 @@ function enterItemDept() {
 	    }
 	    else {
 
-	      // console.log("answer entered = " + answer.dept);
 	      itemDept = answer.dept;
 	      enterItemPrice();
 	    }
@@ -366,12 +330,6 @@ function enterItemPrice() {
 	      	  	// regular expression (regexp) used to make sure all the characters entered by the user are numbers
 	            var pass = value.match(/^\d+.\d+$/);  // ^ means beginning - \d means digits - + means must contain at least one digit - $ means to the end
 	            
-	            // console.log("pass match = ", pass);
-
-	            // console.log(pass);
-	            // console.log("what is the number checked", pass[0]);
-	            // console.log("what is the input", pass.input);
-	            
 	            if (pass != null) {
 	              return true;
 	            } else {
@@ -388,7 +346,6 @@ function enterItemPrice() {
 	    }
 	    else {
 
-	      // console.log("answer entered = " + answer.price);
 	      itemPrice = parseFloat(answer.price);
 	      promptUserQuantity(false);
 	    }
@@ -407,22 +364,17 @@ function checkIdEntered(id) {
 	// query used to validate if the item id input from the user is valid
 	var query = connection.query("SELECT * FROM `products` WHERE item_id = ?", [id], function (err, results, fields) {
 
-		// console.log(query.sql);
-		// console.log(results);
-
 		if (err || results[0] === undefined) {
 
-			// console.log("issue w/ query = " + err);
 			console.log("Item ID " + id + " is not a valid product Id.")
 			promptUserInventoryItem();
 		}
 		else {
 
-			// console.log("no problem w/ query");
 			itemID = id;
 			itemSelectedName = results[0].product_name;
 			itemSelectedPrice = results[0].price;
-			// console.log("Price = " + itemSelectedPrice);
+			
 			console.log("\n\nYou have selected '" + itemSelectedName.cyan + "' for quantity increase.");
 			promptUserQuantity(true); // do not check existing quantity in db sinc this is a new item
 		}
@@ -464,19 +416,16 @@ function promptUserQuantity(checkQuantity) {
 	    }
 	    else {
 
-	      // console.log("answer entered = " + answer.amount);
 	      if (checkQuantity) {
 		 
-		 		// console.log("checking existing quantity called now ... ");
-		       checkExistingQuantity(parseInt(answer.amount), checkQuantity);
+		 	checkExistingQuantity(parseInt(answer.amount), checkQuantity);
 		  }
 		  else {
 
-		  		// console.log("itemQuantity of new product set to " + answer.amount);
-		  		// set global variable quantity to amount from user
-		  		itemQuantity = parseInt(answer.amount);
-		  		// console.log(itemQuantity);
-		  		addNewProduct();
+		  	// set global variable quantity to amount from user
+		  	itemQuantity = parseInt(answer.amount);
+		  	
+		  	addNewProduct();
 		  }
 	    }
 	  });
@@ -496,23 +445,16 @@ function checkExistingQuantity(amt, checkQuantity) {
 	// query the DB to validate if the quantity entered by the user is available
 	var query = connection.query("SELECT stock_quantity FROM `products` WHERE item_id = ?", [itemID], function (err, results, fields) {
 
-		// console.log(query.sql);
-
 		if (err) {
 
-			// console.log("issue w/ query = " + err);
 			console.log("\nQuantity " + amt + " is not a valid amount.");
 			promptUserQuantity(checkQuantity);
 		}
 		else {
 
-			// console.log("no problem w/ query");
-			// console.log(results);
-
 			// set global variable quantity to amount in stock from DB query
 			itemQuantity = results[0].stock_quantity;
-			// console.log(itemQuantity);
-
+			
 			// set global variable to item quantity requested by user
 			itemUpdateQuantity = amt;
 			updateInventoryAmt();
@@ -527,31 +469,18 @@ function checkExistingQuantity(amt, checkQuantity) {
 // ---------------------------------------------------------------------------------------------------------------
 function updateInventoryAmt() {
 
-	// console.log("updating inventory now ... ");
-
 	var newQuantity = itemQuantity + itemUpdateQuantity;
 
 	var query = connection.query("UPDATE products SET stock_quantity = ? WHERE item_id = ?", [newQuantity, itemID], function (err, results, fields) {
 
-		// console.log(query.sql);
-		// console.log(results);
-		// console.log("err = " + err);
-		// console.log("fields = " + fields);
-
 		if (err != null || results.affectedRows === 0) {
 
-			// console.log("issue w/ query = " + err);
-			// console.log("affectedRows = " + results.affectedRows);
 			console.log("\n\nInventory increase not completed.  Please try again.");
-			// clearPrevItemData();
+			
 			addInventoryAmt();
 		}
 		else {
 
-			// console.log("no problem w/ query");
-			// console.log("price = " + itemSelectedPrice);
-			// console.log("quantity = " + itemSelectedQuantity);
-			// console.log("total amt of purchase = " + totalPrice);
 			console.log("\n\nThe quantity of '" + itemSelectedName.cyan + "' has been increased to '" + newQuantity.toString().yellow + "'.\n");
 			promptUserContinue("Update Inventory");
 			return;
@@ -566,8 +495,6 @@ function updateInventoryAmt() {
 // ---------------------------------------------------------------------------------------------------------------
 function addNewProduct() {
 
-	// console.log("adding new product to inventory now ... ");
-
 	var query = connection.query(
 		"INSERT INTO products SET ?",
 		{
@@ -577,25 +504,14 @@ function addNewProduct() {
 		  stock_quantity: itemQuantity
 		}, function (err, results, fields) {
 
-		// console.log(query.sql);
-		// console.log(results);
-		// console.log("err = " + err);
-		// console.log("fields = " + fields);
-
 		if (err != null || results.affectedRows === 0) {
 
-			// console.log("issue w/ query = " + err);
-			// console.log("affectedRows = " + results.affectedRows);
 			console.log("\n\nProduct add was not completed.  Please try again.");
-			// clearPrevItemData();
+			
 			addInventoryItem();
 		}
 		else {
 
-			// console.log("no problem w/ query");
-			// console.log("price = " + itemSelectedPrice);
-			// console.log("quantity = " + itemSelectedQuantity);
-			// console.log("total amt of purchase = " + totalPrice);
 			console.log("\n\nNew Product '" + itemName.cyan + "' has been added with '" + itemQuantity.toString().yellow + "' in stock.\n");
 			promptUserContinue("Add Inventory");
 			return;
@@ -613,8 +529,6 @@ function addNewProduct() {
 // ---------------------------------------------------------------------------------------------------------------
 function promptUserContinue(process) {
 
-	// console.log("continue process module loaded ... ");
-	
 	// Create a "Prompt" with a series of questions.
 	inquirer
 	  .prompt([
@@ -629,22 +543,17 @@ function promptUserContinue(process) {
 	  .then(function(answer) {
 	    
 		// Process the user selection and run that process
-		// console.log("answer received = " + answer.processSelected);
-
 		switch(answer.processSelected) {
 		    case "Continue Existing Process":
 		        
-		        // console.log("Continue existing process - selected");
 		        clearPrevItemData();
 		        
 		        switch(process) {
 		        	case "Update Inventory":
-		        		// console.log("returing to update inventory process");
 		        		addInventoryAmt();
 		        		break;
 
 		        	case "Add Inventory":
-		        		// console.log("returning to add product process");
 		        		addInventoryItem();
 		        		break;
 
@@ -654,17 +563,11 @@ function promptUserContinue(process) {
 		        break;
 
 		    case "Return to Main Option Menu":
-		        // console.log("Main menu option - selected");
 		        mainMenuPrompt();
 		        break;
 
 		    case "Quit":
-		  //   	// console.log("Quit option - selected");
-		  //   	console.log("\n\nThanks for helping make Bamazon Great!\n\n".rainbow);
-				// // end the shopping app now
-				// connection.end();
-				// return;
-				endApp();
+		  		endApp();
 		        break;
 
 		    default:
@@ -679,8 +582,8 @@ function promptUserContinue(process) {
 
 function endApp() {
 	    	
-	// console.log("Quit option - selected");
 	console.log("\n\nThanks for helping make Bamazon Great!\n\n".rainbow);
+	
 	// end the shopping app now
 	connection.end();
 	return;
@@ -692,9 +595,6 @@ function endApp() {
 // Reset all the global variables being used  
 // ---------------------------------------------------------------------------------------------------------------
 function clearPrevItemData() {
-
-	// clear out all the global variable and restart the module
-	// console.log("clearing all the global variable data for restart");
 
 	// reset global variables 
 	itemID = 0;  // itemID entered by user
