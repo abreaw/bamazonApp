@@ -26,6 +26,7 @@ _To view a demo of the app workflow -->_ [YouTube](https://youtu.be/Zz_jsAa7WEc)
 		* Add New Product
 		* Quit
 
+
 	_**View Products for Sale**_ shows a list of all the items in the database with all the details including quantity in stock.
 		After the list is displayed the user is then prompted to choose another option from the _Main Menu_.
 
