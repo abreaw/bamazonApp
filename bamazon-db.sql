@@ -37,4 +37,4 @@ UPDATE products
 USE bamazon;
 
 DELETE FROM products
-	WHERE item_id = 18;
+	WHERE item_id > 18;

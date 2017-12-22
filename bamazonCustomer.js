@@ -194,7 +194,7 @@ function checkIdEntered(id) {
 			itemSelectedName = results[0].product_name;
 			itemSelectedPrice = results[0].price;
 			// console.log("Price = " + itemSelectedPrice);
-			console.log("\n\nThank you.  You have selected '" + itemSelectedName.cyan + "' for your purchase.");
+			console.log("\n\nThank you.  You have selected '" + itemSelectedName.cyan + "' for your purchase.\n");
 			promptUserQuantity();
 		}
 
@@ -321,8 +321,12 @@ function updateInventoryAmt() {
 			// console.log("price = " + itemSelectedPrice);
 			// console.log("quantity = " + itemSelectedQuantity);
 			var totalPrice = itemSelectedPrice * itemSelectedQuantity;
+
+			// round totalPrice to the nearest hundreths decimal place
+			totalPrice = Math.round(100*totalPrice)/100;
+
 			// console.log("total amt of purchase = " + totalPrice);
-			console.log("\n\nThank you.  Your total purchase is '" + "$".cyan + totalPrice.toString().cyan + "' you will be billed when your order is shipped. \n\nYour '" + itemSelectedName.cyan + "' will arrive within 7-10 business days.");
+			console.log("\n\nThank you.  Your total purchase is '" + "$".cyan + totalPrice.toFixed(2).cyan + "' you will be billed when your order is shipped. \n\nYour '" + itemSelectedName.cyan + "' will arrive within 7-10 business days.\n");
 			promptUserContinueShopping();
 		}
 
@@ -372,7 +376,7 @@ function promptUserContinueShopping() {
 function clearPrevItemData() {
 
 	// clear out all the global variable and restart the module
-	console.log("restarting app ... calling the getInventory function to move through the process again");
+	// console.log("restarting app ... calling the getInventory function to move through the process again");
 
 	// reset global variables 
 	itemID = 0;  // itemID entered by user

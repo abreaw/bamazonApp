@@ -41,6 +41,9 @@ var connection = mysql.createConnection({
 
 });
 
+// scroll existing info so it is no longer shown in the console window
+clearConsoleWindows();
+
 // run the main menu for user to select an option
 mainMenuPrompt();
 
@@ -59,8 +62,8 @@ function mainMenuPrompt(){
 	    // Here we give the user a list to choose from.
 	    {
 	      type: "list",
-	      message: "Please select a process you would like to complete.",
-	      choices: ["View Products for Sale", "View Low Inventory", "Add to Inventory", "Add New Product"],
+	      message: "\nPlease select a process you would like to complete.",
+	      choices: ["View Products for Sale", "View Low Inventory", "Add to Inventory", "Add New Product", "Quit"],
 	      name: "processSelected"
 	    }
 	  ])
@@ -86,6 +89,14 @@ function mainMenuPrompt(){
 		    	// console.log("Add New Product - selected");
 		    	addInventoryItem();
 		        break;
+	        case "Quit":
+	      //   	// console.log("Quit option - selected");
+	      //   	console.log("\n\nThanks for helping make Bamazon Great!\n\n".rainbow);
+	    		// // end the shopping app now
+	    		// connection.end();
+	    		// return;
+	    		endApp();
+	            break;
 		    default:
 		        console.log("Selection Invalid. Try again.");
 		        mainMenuPrompt()
@@ -124,6 +135,7 @@ function mainMenuPrompt(){
 		}
 
 		console.log("----------------------------------------------------------");
+		console.log("");
 		mainMenuPrompt();
 		// connection.end();  // might need to put this elsewhere to get the connection to run properly
 
@@ -350,10 +362,17 @@ function enterItemPrice() {
 	      name: "price",
 	      validate: function(value) 
 	      	  {
-	            // regular expression (regexp) used to make sure all the characters entered by the user are numbers
+	            
+	      	  	// regular expression (regexp) used to make sure all the characters entered by the user are numbers
 	            var pass = value.match(/^\d+.\d+$/);  // ^ means beginning - \d means digits - + means must contain at least one digit - $ means to the end
-	            console.log("pass match = ", pass);
-	            if (pass) {
+	            
+	            // console.log("pass match = ", pass);
+
+	            // console.log(pass);
+	            // console.log("what is the number checked", pass[0]);
+	            // console.log("what is the input", pass.input);
+	            
+	            if (pass != null) {
 	              return true;
 	            } else {
 		          console.log('  -- Please enter a valid price (ex. 3.99)');
@@ -533,7 +552,7 @@ function updateInventoryAmt() {
 			// console.log("price = " + itemSelectedPrice);
 			// console.log("quantity = " + itemSelectedQuantity);
 			// console.log("total amt of purchase = " + totalPrice);
-			console.log("\n\nThe quantity of '" + itemSelectedName.cyan + "' has been increased to '" + newQuantity.toString().yellow + "'.");
+			console.log("\n\nThe quantity of '" + itemSelectedName.cyan + "' has been increased to '" + newQuantity.toString().yellow + "'.\n");
 			promptUserContinue("Update Inventory");
 			return;
 		}
@@ -577,7 +596,7 @@ function addNewProduct() {
 			// console.log("price = " + itemSelectedPrice);
 			// console.log("quantity = " + itemSelectedQuantity);
 			// console.log("total amt of purchase = " + totalPrice);
-			console.log("\n\nNew Product '" + itemName.cyan + "' has been added with '" + itemQuantity.toString().yellow + "' in stock.");
+			console.log("\n\nNew Product '" + itemName.cyan + "' has been added with '" + itemQuantity.toString().yellow + "' in stock.\n");
 			promptUserContinue("Add Inventory");
 			return;
 		}
@@ -640,11 +659,12 @@ function promptUserContinue(process) {
 		        break;
 
 		    case "Quit":
-		    	// console.log("Quit option - selected");
-		    	console.log("\n\nThanks for helping make Bamazon Great!\n\n".rainbow);
-				// end the shopping app now
-				connection.end();
-				return;
+		  //   	// console.log("Quit option - selected");
+		  //   	console.log("\n\nThanks for helping make Bamazon Great!\n\n".rainbow);
+				// // end the shopping app now
+				// connection.end();
+				// return;
+				endApp();
 		        break;
 
 		    default:
@@ -653,6 +673,17 @@ function promptUserContinue(process) {
 		}
 
 	  });
+
+}
+
+
+function endApp() {
+	    	
+	// console.log("Quit option - selected");
+	console.log("\n\nThanks for helping make Bamazon Great!\n\n".rainbow);
+	// end the shopping app now
+	connection.end();
+	return;
 
 }
 
@@ -720,4 +751,18 @@ function addProperSpace(field, maxLength) {
 	}
 
 	return fieldString;
+}
+
+
+// -----------------------------------------------------------------------------------
+// moves the console view so the user only sees the game play happening
+// -----------------------------------------------------------------------------------
+function clearConsoleWindows() {
+
+	if (process.platform === 'win32') {
+		console.log("\u001b[2J\u001b[0;5H");  // moves the console to the 0,0 position (does not clear the history)
+	} else {
+		console.log("user not windows user");
+	}
+
 }
