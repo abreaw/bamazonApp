@@ -7,7 +7,7 @@ There are two node apps in this repo.
 1. bamazonCustomer.js
 1. bamazonManager.js
 
-_To view a demo of the app workflow -->_ [YouTube] (https://youtu.be/Zz_jsAa7WEc)
+_To view a demo of the app workflow -->_ [YouTube](https://youtu.be/Zz_jsAa7WEc)
 
 **bamazonCustomer.js** allows the user to view the items that are in the _**bamazon**_ MySQL database within the _**products**_
 	table.  It is a command line Node.js app that shows all items available for sale at _bamazon_ and prompts the user for an
